@@ -56,9 +56,13 @@ public class WebCrawler {
                     String href = link.attr("abs:href");
                     // Only follow English Wikipedia article links
                     if (href.startsWith("https://en.wikipedia.org/wiki/")
-                            && !href.contains("#")
-                            && !href.contains(":")    // skip File:, Talk:, etc.
-                            && !visited.contains(href)) {
+                        && !href.contains("#")
+                        && !href.contains("Main_Page")
+                        && !href.contains("Special:")
+                        && !href.contains("Help:")
+                        && !href.contains("File:")
+                        && !href.contains("Category:")
+                        && !visited.contains(href)) {
                         queue.add(href);
                     }
                 }

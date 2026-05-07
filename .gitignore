@@ -1,3 +1,5 @@
+crawled_pages/
+*.class
 out/
 .idea/
-*.class
+*.iml
