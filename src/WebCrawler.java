@@ -31,7 +31,8 @@ public class WebCrawler {
             String url = queue.poll();
 
             // Skip already visited
-            if (visited.contains(url)) continue;
+            if (visited.contains(url))
+                continue;
             visited.add(url);
 
             System.out.println("Crawling [" + pageCount + "]: " + url);
@@ -56,13 +57,16 @@ public class WebCrawler {
                     String href = link.attr("abs:href");
                     // Only follow English Wikipedia article links
                     if (href.startsWith("https://en.wikipedia.org/wiki/")
-                        && !href.contains("#")
-                        && !href.contains("Main_Page")
-                        && !href.contains("Special:")
-                        && !href.contains("Help:")
-                        && !href.contains("File:")
-                        && !href.contains("Category:")
-                        && !visited.contains(href)) {
+                            && !href.contains("#")
+                            && !href.contains("Main_Page")
+                            && !href.contains("Special:")
+                            && !href.contains("Help:")
+                            && !href.contains("File:")
+                            && !href.contains("Category:")
+                            && !href.contains("Wikipedia:")
+                            && !href.contains("Portal:")
+                            && !href.contains("Talk:")
+                            && !visited.contains(href)) {
                         queue.add(href);
                     }
                 }
