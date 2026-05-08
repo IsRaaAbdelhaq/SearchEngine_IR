@@ -6,13 +6,24 @@ public class TFIDFVectorizer {
     private Map<String, Map<String, Integer>> invertedIndex;
     private Map<String, Double> idf;
     private Map<String, Map<String, Double>> docVectors;
+    private Map<String, Integer> docLengths;
 
     public TFIDFVectorizer(Map<String, Map<String, Integer>> invertedIndex, int totalDocs) {
         this.invertedIndex = invertedIndex;
         this.totalDocs     = totalDocs;
         this.idf           = new HashMap<>();
         this.docVectors    = new HashMap<>();
+        this.docLengths    = new HashMap<>();
+
+        for (Map<String, Integer> postings : invertedIndex.values()) {
+            for (Map.Entry<String, Integer> entry : postings.entrySet()) {
+                String docId = entry.getKey();
+                int    tf    = entry.getValue();
+                docLengths.merge(docId, tf, Integer::sum);
+            }
+        }
     }
+
 
     public void computeIDF() {
         for (String term : invertedIndex.keySet()) {
@@ -54,11 +65,9 @@ public class TFIDFVectorizer {
 
     public Map<String, Double> computeCosineSimilarity(Map<String, Double> queryVector) {
         Map<String, Double> scores = new HashMap<>();
-
         for (Map.Entry<String, Map<String, Double>> docEntry : docVectors.entrySet()) {
             String docId = docEntry.getKey();
             Map<String, Double> docVector = docEntry.getValue();
-
             double dotProduct = 0.0;
             for (Map.Entry<String, Double> qEntry : queryVector.entrySet()) {
                 String term    = qEntry.getKey();
@@ -66,30 +75,21 @@ public class TFIDFVectorizer {
                 double dWeight = docVector.getOrDefault(term, 0.0);
                 dotProduct += qWeight * dWeight;
             }
-
             scores.put(docId, dotProduct);
         }
-
         return scores;
     }
 
     public void normalizeScores(Map<String, Double> scores) {
-        for (Map.Entry<String, Map<String, Double>> docEntry : docVectors.entrySet()) {
-            String docId = docEntry.getKey();
-
-            double length = 0.0;
-            for (double weight : docEntry.getValue().values()) {
-                length += weight * weight;
-            }
-            length = Math.sqrt(length);
-
-            if (length > 0 && scores.containsKey(docId)) {
-                scores.put(docId, scores.get(docId) / length);
-            }
+        for (Map.Entry<String, Double> entry : scores.entrySet()) {
+            String docId = entry.getKey();
+            int length = docLengths.getOrDefault(docId, 1);
+            scores.put(docId, entry.getValue() / length);
         }
     }
 
     public Map<String, Map<String, Double>> getDocVectors() { return docVectors; }
     public Map<String, Double> getIDF()                     { return idf; }
+    public Map<String, Integer> getDocLengths()             { return docLengths; }
 
-  
+ 
